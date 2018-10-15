@@ -675,13 +675,15 @@ open class GalleryViewController: UIPageViewController, ItemControllerDelegate {
         case (_ as ImageViewController, let item as UIImageView):
             guard let image = item.image else { return }
             let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-            self.present(activityVC, animated: true)
-
+            
+            self._present(avc: activityVC, sourceView: item)
+            
         case (_ as VideoViewController, let item as VideoView):
             guard let videoUrl = ((item.player?.currentItem?.asset) as? AVURLAsset)?.url else { return }
             let activityVC = UIActivityViewController(activityItems: [videoUrl], applicationActivities: nil)
-            self.present(activityVC, animated: true)
-
+            
+            self._present(avc: activityVC, sourceView: item)
+            
         default:  return
         }
     }
@@ -712,5 +714,25 @@ open class GalleryViewController: UIPageViewController, ItemControllerDelegate {
         self.swipedToDismissCompletion?()
         self.overlayView.removeFromSuperview()
         self.dismiss(animated: false, completion: nil)
+    }
+}
+
+
+fileprivate extension UIViewController{
+    /// 兼容 ipad alertVC
+    fileprivate func _present(avc:UIActivityViewController,sourceView:UIView){
+        if UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.pad {
+            
+            let popPresenter = avc.popoverPresentationController
+            
+            popPresenter?.sourceView = sourceView
+            popPresenter?.sourceRect = (popPresenter?.sourceView?.bounds) ?? .zero
+            popPresenter?.permittedArrowDirections = .any
+            
+            present(avc, animated: true, completion: nil)
+            
+        }else{
+            present(avc, animated: true, completion: nil)
+        }
     }
 }
